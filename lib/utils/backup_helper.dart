@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:device_info_plus/device_info_plus.dart';   // 修正分号
 import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../models/memo.dart';
@@ -99,13 +100,26 @@ class BackupHelper {
 
   /// 请求存储权限
   Future<bool> _requestStoragePermission() async {
-    // Android 13+ (API 33+) 不再需要 WRITE_EXTERNAL_STORAGE
-    // 使用 file_picker 配合 MANAGE_EXTERNAL_STORAGE 或更细粒度权限
-    // 这里简单返回 true，实际可根据平台处理
     if (Platform.isAndroid) {
-      final status = await Permission.manageExternalStorage.request();
-      return status.isGranted;
+      try {
+        final androidInfo = await DeviceInfoPlugin().androidInfo;
+        final sdkInt = androidInfo.version.sdkInt;
+        
+        if (sdkInt >= 30) {
+          // Android 11+ (API 30+) 使用 MANAGE_EXTERNAL_STORAGE
+          final status = await Permission.manageExternalStorage.request();
+          return status.isGranted;
+        } else {
+          // Android 10 及以下 (API 29-) 使用 READ/WRITE_EXTERNAL_STORAGE
+          final status = await Permission.storage.request();
+          return status.isGranted;
+        }
+      } catch (e) {
+        // 如果获取版本失败，回退到 storage 权限
+        final status = await Permission.storage.request();
+        return status.isGranted;
+      }
     }
-    return true; // Linux/Windows 桌面直接读写
+    return true; // 非 Android 平台直接返回 true
   }
 }
