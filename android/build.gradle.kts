@@ -3,6 +3,14 @@ allprojects {
         google()
         mavenCentral()
     }
+    afterEvaluate {
+        if (project.plugins.hasPlugin("com.android.application") ||
+            project.plugins.hasPlugin("com.android.library")) {
+            android {
+                compileSdk = 36
+            }
+        }
+    }
 }
 
 val newBuildDir: Directory =
