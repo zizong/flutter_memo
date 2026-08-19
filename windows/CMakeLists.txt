@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(flutter_application_1 LANGUAGES CXX)
 
+add_definitions(-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
 set(BINARY_NAME "flutter_application_1")
