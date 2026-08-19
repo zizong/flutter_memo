@@ -6,7 +6,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:share/share.dart';  // 新增：用于分享文件
 import '../models/memo.dart';
 import '../database/db_helper.dart';
 
