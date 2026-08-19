@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io' show Platform;
-import 'memo_list_page.dart';   // 引用新页面
+import 'memo_list_page.dart';   // <-- 添加这一行
 
 void main() {
-  // Linux 桌面环境需要额外初始化 sqflite
   if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
@@ -20,7 +19,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool _isDark = false; // 当前是否为夜间模式
+  bool _isDark = false;
 
   void toggleTheme() {
     setState(() {

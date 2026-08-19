@@ -20,7 +20,6 @@ class _MemoEditPageState extends State<MemoEditPage> {
   @override
   void initState() {
     super.initState();
-    // 如果是编辑，用已有数据填充
     _titleController = TextEditingController(text: widget.memo?.title ?? '');
     _contentController = TextEditingController(text: widget.memo?.content ?? '');
   }
@@ -32,7 +31,7 @@ class _MemoEditPageState extends State<MemoEditPage> {
     super.dispose();
   }
 
-  // 保存（新建或更新）
+  // ---------- 保存 ----------
   Future<void> _saveMemo() async {
     final title = _titleController.text.trim();
     final content = _contentController.text.trim();
@@ -59,25 +58,55 @@ class _MemoEditPageState extends State<MemoEditPage> {
         id: widget.memo!.id,
         title: title,
         content: content,
-        createdAt: widget.memo!.createdAt, // 保留原创建时间
+        createdAt: widget.memo!.createdAt,
       );
       await _db.updateMemo(updatedMemo);
     }
 
     setState(() => _isLoading = false);
-    // 返回 true 表示操作成功，让主页面刷新
     Navigator.pop(context, true);
   }
 
-  // 删除
+  // ---------- 删除（带确认对话框） ----------
   Future<void> _deleteMemo() async {
     if (widget.memo == null) return;
+
+    // 显示确认对话框
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          '确认删除',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Text('确定要删除“${widget.memo!.title}”吗？此操作不可撤销。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('删除'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    // 执行删除
     setState(() => _isLoading = true);
     await _db.deleteMemo(widget.memo!.id!);
     setState(() => _isLoading = false);
     Navigator.pop(context, true);
   }
 
+  // ---------- 构建 UI ----------
   @override
   Widget build(BuildContext context) {
     final isEdit = widget.memo != null;
@@ -88,7 +117,8 @@ class _MemoEditPageState extends State<MemoEditPage> {
           if (isEdit)
             IconButton(
               icon: const Icon(Icons.delete),
-              onPressed: _deleteMemo,
+              onPressed: _isLoading ? null : _deleteMemo,
+              tooltip: '删除',
             ),
         ],
       ),
@@ -112,7 +142,7 @@ class _MemoEditPageState extends State<MemoEditPage> {
                   border: OutlineInputBorder(),
                   alignLabelWithHint: true,
                 ),
-                maxLines: null, // 多行
+                maxLines: null,
                 expands: true,
               ),
             ),
