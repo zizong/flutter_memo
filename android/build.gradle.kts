@@ -1,3 +1,8 @@
+import com.android.build.gradle.BaseExtension
+import java.io.File
+import java.util.Properties
+import java.io.FileInputStream
+
 allprojects {
     repositories {
         google()
@@ -6,9 +11,9 @@ allprojects {
     afterEvaluate {
         if (project.plugins.hasPlugin("com.android.application") ||
             project.plugins.hasPlugin("com.android.library")) {
-            android {
-                compileSdk = 36
-            }
+            // 显式获取 android 扩展并设置 compileSdk
+            val android = project.extensions.getByName("android") as BaseExtension
+            android.compileSdk = 36
         }
     }
 }
