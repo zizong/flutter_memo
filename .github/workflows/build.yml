@@ -19,7 +19,6 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.0'  # 使用稳定版本，可自行调整
           channel: 'stable'
 
       - name: Install dependencies
@@ -45,7 +44,6 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.0'
           channel: 'stable'
 
       - name: Enable Linux desktop
@@ -74,7 +72,6 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.0'
           channel: 'stable'
 
       - name: Enable Windows desktop
