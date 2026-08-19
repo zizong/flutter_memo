@@ -12,45 +12,47 @@ class BackupHelper {
   final DBHelper _db = DBHelper();
 
   /// 导出所有数据为 JSON 文件
-  Future<String?> exportData() async {
-    try {
-      // 请求存储权限（Android 13+ 需要）
-      if (await _requestStoragePermission() == false) {
-        return '需要存储权限才能导出数据';
-      }
-
-      final memos = await _db.getAllMemos();
-      if (memos.isEmpty) {
-        return '没有可导出的数据';
-      }
-
-      // 转换为 JSON
-      final jsonList = memos.map((memo) => {
-        'id': memo.id,
-        'title': memo.title,
-        'content': memo.content,
-        'createdAt': memo.createdAt.toIso8601String(),
-      }).toList();
-
-      final jsonString = jsonEncode(jsonList);
-
-      // 让用户选择保存位置
-      String? outputFile = await FilePicker.platform.saveFile(
-        dialogTitle: '保存备忘录备份',
-        fileName: 'memo_backup_${DateTime.now().millisecondsSinceEpoch}.json',
-      );
-
-      if (outputFile == null) {
-        return null; // 用户取消
-      }
-
-      final file = File(outputFile);
-      await file.writeAsString(jsonString, mode: FileMode.write);
-      return '数据已导出到：$outputFile';
-    } catch (e) {
-      return '导出失败：$e';
+  /// 导出所有数据为 JSON 文件
+Future<String?> exportData() async {
+  try {
+    // 请求存储权限
+    if (await _requestStoragePermission() == false) {
+      return '需要存储权限才能导出数据';
     }
+
+    final memos = await _db.getAllMemos();
+    if (memos.isEmpty) {
+      return '没有可导出的数据';
+    }
+
+    // 转换为 JSON
+    final jsonList = memos.map((memo) => {
+      'id': memo.id,
+      'title': memo.title,
+      'content': memo.content,
+      'createdAt': memo.createdAt.toIso8601String(),
+    }).toList();
+
+    final jsonString = jsonEncode(jsonList);
+
+    // 让用户选择保存位置
+    String? outputFile = await FilePicker.platform.saveFile(
+      dialogTitle: '保存备忘录备份',
+      fileName: 'memo_backup_${DateTime.now().millisecondsSinceEpoch}.json',
+    );
+
+    if (outputFile == null) {
+      return null; // 用户取消
+    }
+
+    final file = File(outputFile);
+    // 关键修复：使用 writeAsBytes 并编码为 UTF-8
+    await file.writeAsBytes(utf8.encode(jsonString), mode: FileMode.write);
+    return '数据已导出到：$outputFile';
+  } catch (e) {
+    return '导出失败：$e';
   }
+}
 
   /// 导入数据
   Future<String?> importData() async {
