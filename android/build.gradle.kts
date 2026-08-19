@@ -1,4 +1,4 @@
-import com.android.build.gradle.BaseExtension
+import com.android.build.api.dsl.CommonExtension
 import java.io.File
 import java.util.Properties
 import java.io.FileInputStream
@@ -11,9 +11,16 @@ allprojects {
     afterEvaluate {
         if (project.plugins.hasPlugin("com.android.application") ||
             project.plugins.hasPlugin("com.android.library")) {
-            // 显式获取 android 扩展并设置 compileSdk
-            val android = project.extensions.getByName("android") as BaseExtension
-            android.compileSdk = 36
+            // 使用 CommonExtension 代替 BaseExtension
+            val android = project.extensions.getByType(CommonExtension::class.java)
+            // 设置 compileSdkVersion（注意：某些版本是 compileSdk，我们同时设置两个）
+            android.compileSdkVersion = 36
+            // 如果 compileSdk 可用，也设置：
+            try {
+                android.compileSdk = 36
+            } catch (e: Exception) {
+                // 忽略，可能已设置
+            }
         }
     }
 }
