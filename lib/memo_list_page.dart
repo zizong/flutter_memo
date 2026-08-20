@@ -133,25 +133,26 @@ class _MemoListPageState extends State<MemoListPage> {
     ).then((value) => value ?? false);
   }
 
-  Future<void> _batchDelete() async {
-    if (_selectedIds.isEmpty) return;
-    await _showDeleteConfirmDialog(
-      title: '确认批量删除',
-      content: '确定要删除选中的 ${_selectedIds.length} 条备忘录吗？此操作不可撤销。',
-      onConfirm: () async {
-        for (final id in _selectedIds) {
-          await _db.deleteMemo(id);
-        }
-        _refreshList();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('已删除 ${_selectedIds.length} 条备忘录'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      },
-    );
-  }
+Future<void> _batchDelete() async {
+  if (_selectedIds.isEmpty) return;
+  await _showDeleteConfirmDialog(
+    title: '确认批量删除',
+    content: '确定要删除选中的 ${_selectedIds.length} 条备忘录吗？此操作不可撤销。',
+    onConfirm: () async {
+      final count = _selectedIds.length; // 保存数量
+      for (final id in _selectedIds) {
+        await _db.deleteMemo(id);
+      }
+      _refreshList(); // 这里已经包含 _exitSelectionMode
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('已删除 $count 条备忘录'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    },
+  );
+}
 
   // ===== 导出 / 导入 =====
   Future<void> _exportData() async {
